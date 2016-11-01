@@ -213,4 +213,4 @@ class NetworkSecurityGroup(Probe):
 		self.appendAtomic(self.doRealScan,self.nullRollback)
 		self.appendAtomic(self.checkResult,self.nullRollback)
 
-probe = NetworkSecurityGroup()
+probe = NetworkSecurityGroup
