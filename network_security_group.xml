@@ -2,34 +2,37 @@
 <TestCases>
       <TestCase>
          <ID>1</ID>
-          <TestInstance Operation="Configuration">
-                    <Input key="CheckTCP" value="=True" />
-                     <Item key="CheckUDP" value="False" /> 
-                     <Item key="TCPMaxPort" value="2024" />
-                     <Item key="TCPMinPort" value="1" /> 
+         <TestInstance Operation="Configuration">
+             <Input>
+                 <Item key="CheckTCP" value="True" />
+                 <Item key="CheckUDP" value="False" /> 
+                 <Item key="TCPMaxPort" value="2024" />
+                 <Item key="TCPMinPort" value="1" /> 
            </TestInstance>
           <TestInstance Operation="OpenStackConfig">
             <Input>
               <Item key="OS_AUTH_URL" value="http://172.25.27.69:5000/v2.0" />
               <Item key="OS_USERNAME" value="user" />
               <Item key="OS_PASSWORD" value="userpwd" />
-              <Item key="OS_TENANT_NAME" value="project1" />
-              <Item key="OS_REGION_NAME" value="RegioneONE" />
-
+              <Item key="OS_PROJECT_ID" value="" />
+              <Item key="OS_USER_DOMAIN_NAME" value="Users" />
             </Input>
         </TestInstance>
         <TestInstance Operation="DeployHoneypot">
+            <Input>
         	  <Item key="FloatingIPPool" value="2cee29bc-a268-4f54-8f7b-3a5fdfb86ea8" /> 
         	  <Item key="Image" value="ubuntu" />
         	  <Item key="Flavor" value="s1.small" />
         	  <Item key="SecurityGroup" value="test_network" />
  			  <Item key="Timeout" value="1000" />
  			  <Item key="Network" value="Project1-network" />
- 	
+ 	        </Input>
         </TestInstance>
         <TestInstance Operation="NMapScan">
+            <Input>
               <Item key="Pn" value="True" />
               <Item key="TCPSynScan" value="False" />
+            </Input>  
         </TestInstance>
      </TestCase>
  </TestCases>

@@ -2,14 +2,17 @@ __author__ = 'Patrizio Tufarolo'
 __email__ = 'patrizio.tufarolo@studenti.unimi.it'
 
 
-import time,uuid,subprocess
+import time
+import uuid
+import subprocess
 
 from testagent.probe import Probe
 
-from neutronclient.v2_0 import client as NeutronClient
+from neutronclient.v2_0.client import Client as NeutronClient
 from novaclient.client import Client as NovaClient
-from keystoneclient.auth.identity import v2 as KeystoneClient
-from keystoneclient import session as KeystoneSession
+from keystoneauth1.identity import v3 as KeystoneClient
+from keystoneauth1 import session as KeystoneSession
+
 from libnmap.process import NmapProcess
 from libnmap.parser import NmapParser, NmapParserException
 
@@ -20,17 +23,14 @@ class NetworkSecurityGroup(Probe):
 		return inputData
 
 	def createNeutronClient(self,inputData):
-		self.neucl = NeutronClient.Client(auth_url=self.testinstances["OpenStackConfig"]["OS_AUTH_URL"],
-						username=self.testinstances["OpenStackConfig"]["OS_USERNAME"],
-						password=self.testinstances["OpenStackConfig"]["OS_PASSWORD"],
-						tenant_name=self.testinstances["OpenStackConfig"]["OS_TENANT_NAME"],
-						region_name=self.testinstances["OpenStackConfig"]["OS_REGION_NAME"])
 		self.keystonecl = KeystoneClient.Password(auth_url=self.testinstances["OpenStackConfig"]["OS_AUTH_URL"],
 						username=self.testinstances["OpenStackConfig"]["OS_USERNAME"],
 						password=self.testinstances["OpenStackConfig"]["OS_PASSWORD"],
-						tenant_name=self.testinstances["OpenStackConfig"]["OS_TENANT_NAME"])
+						project_id=self.testinstances["OpenStackConfig"]["OS_PROJECT_ID"],
+						user_domain_name=self.testinstances["OpenStackConfig"]["OS_USER_DOMAIN_NAME"])
 		sess = KeystoneSession.Session(auth=self.keystonecl)
-		self.novacl = NovaClient(3,session=sess)
+		self.novacl = NovaClient(2,session=sess)
+		self.neucl = NeutronClient(session=sess)
 		return inputData
 
 
@@ -131,12 +131,12 @@ class NetworkSecurityGroup(Probe):
 				if rule["direction"] == "ingress":
 					if rule["protocol"] == "icmp":
 						icmp = 1 if icmp == 0 else icmp
-					
+
 					elif rule["port_range_min"] and rule["port_range_max"]:
 						for i in range(rule["port_range_min"],rule["port_range_max"]+1):
 							if self.testinstances["Configuration"]["CheckTCP"] and rule["protocol"] == "tcp" and i >= int(self.testinstances["Configuration"]["TCPMinPort"]) and i <= int(self.testinstances["Configuration"]["TCPMaxPort"]):
 								dict_tcp[i] = 1
-							if self.testinstances["Configuration"]["CheckUDP"] and rule["protocol"] == "udp" and i >= int(self.testinstances["Configuration"]["UDPMinPort"]) and i <= int(self.testinstances["Configuration"]["UDPMaxPort"]):	
+							if self.testinstances["Configuration"]["CheckUDP"] and rule["protocol"] == "udp" and i >= int(self.testinstances["Configuration"]["UDPMinPort"]) and i <= int(self.testinstances["Configuration"]["UDPMaxPort"]):
 								dict_udp[i] = 1
 		if self.testinstances["Configuration"]["CheckTCP"]:
 			print("Parsed TCP:")
@@ -167,7 +167,7 @@ class NetworkSecurityGroup(Probe):
 		if self.testinstances["Configuration"]["CheckTCP"] == "True":
 			tcp_options = options + " -p"+self.testinstances["Configuration"]["TCPMinPort"]+"-"+self.testinstances["Configuration"]["TCPMaxPort"]+" -s"
 			tcp_options += "S" if self.testinstances["NMapScan"]["TCPSynScan"] == "True" else "T"
-			
+
 			new_tcp_options = list(new_options)
 			new_tcp_options.append("-p"+self.testinstances["Configuration"]["TCPMinPort"]+"-"+self.testinstances["Configuration"]["TCPMaxPort"])
 			if self.testinstances["NMapScan"]["TCPSynScan"] == "True":
@@ -185,7 +185,7 @@ class NetworkSecurityGroup(Probe):
 
 
 		if self.testinstances["Configuration"]["CheckUDP"] == "True":
-			udp_options = options + " -p"+self.testinstances["Configuration"]["UDPMinPort"]+"-"+self.testinstances["Configuration"]["UDPMaxPort"]+" -sU"	
+			udp_options = options + " -p"+self.testinstances["Configuration"]["UDPMinPort"]+"-"+self.testinstances["Configuration"]["UDPMaxPort"]+" -sU"
 			udpScanResults = do_scan(ip,udp_options)
 			print("udpScanResults")
 			print(udpScanResults)
@@ -213,4 +213,4 @@ class NetworkSecurityGroup(Probe):
 		self.appendAtomic(self.doRealScan,self.nullRollback)
 		self.appendAtomic(self.checkResult,self.nullRollback)
 
-probe = NetworkSecurityGroup()
+probe = NetworkSecurityGroup
