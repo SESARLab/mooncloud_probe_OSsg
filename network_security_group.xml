@@ -13,8 +13,8 @@
               <Item key="OS_AUTH_URL" value="http://172.25.27.69:5000/v2.0" />
               <Item key="OS_USERNAME" value="user" />
               <Item key="OS_PASSWORD" value="userpwd" />
-              <Item key="OS_TENANT_NAME" value="project1" />
-              <Item key="OS_REGION_NAME" value="RegioneONE" />
+              <Item key="OS_PROJECT_ID" value="" />
+              <Item key="OS_USER_DOMAIN_NAME" value="Users" />
 
             </Input>
         </TestInstance>
